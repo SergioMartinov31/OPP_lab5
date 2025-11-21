@@ -29,7 +29,7 @@ int main() {
     print(b);
 
     std::cout << "\n=== Test erase ===\n";
-    a.erase(1); // remove 20
+    a.erase(1);
     print(a);
 
     std::cout << "\n=== Program end ===\n";

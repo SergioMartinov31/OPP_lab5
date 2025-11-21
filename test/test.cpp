@@ -3,7 +3,6 @@
 #include "../include/MemoryResource.h"
 #include "../include/Person.h"
 
-// Вспомогательный класс для подсчёта аллокаций
 class CountingMemoryResource : public CustomMemoryResource {
 public:
     size_t allocCount = 0;
@@ -24,7 +23,7 @@ public:
     }
 };
 
-// Тестовый класс с конструктором/деструктором для отслеживания
+
 class TestObject {
 public:
     static int constructed;
@@ -81,7 +80,7 @@ int TestObject::destroyed = 0;
 int TestObject::copied = 0;
 int TestObject::moved = 0;
 
-// Простейшие тесты с int
+
 TEST(DynamicArrayBasic, CreateEmptyArray) {
     CountingMemoryResource mem;
     DynamicArray<int> arr(&mem);
@@ -116,7 +115,7 @@ TEST(DynamicArrayBasic, AccessElements) {
     EXPECT_EQ(arr[1], 20);
     EXPECT_EQ(arr[2], 30);
     
-    // Проверка константного доступа
+    
     const DynamicArray<int>& carr = arr;
     EXPECT_EQ(carr[1], 20);
 }
@@ -132,7 +131,7 @@ TEST(DynamicArrayBasic, AtMethodBoundsCheck) {
     EXPECT_THROW(arr.at(100), std::out_of_range);
 }
 
-// Тесты с пользовательским типом Person
+
 TEST(DynamicArrayPerson, StorePersons) {
     CountingMemoryResource mem;
     DynamicArray<Person> people(&mem);
@@ -159,7 +158,7 @@ TEST(DynamicArrayPerson, ModifyPersons) {
     EXPECT_EQ(people[0].age, 41);
 }
 
-// Тесты итераторов
+
 TEST(DynamicArrayIterators, ForwardIteration) {
     CountingMemoryResource mem;
     DynamicArray<int> arr(&mem);
@@ -197,7 +196,6 @@ TEST(DynamicArrayIterators, ConstIterators) {
     EXPECT_EQ(sum, 300);
 }
 
-// Тесты удаления элементов
 
 TEST(DynamicArrayMemory, EraseShiftsElements) {
     CountingMemoryResource mem;
@@ -207,7 +205,7 @@ TEST(DynamicArrayMemory, EraseShiftsElements) {
         arr.push_back(i);
     }
     
-    arr.erase(2); // Удаляем элемент со значением 2
+    arr.erase(2);
     
     EXPECT_EQ(arr.size(), 4u);
     EXPECT_EQ(arr[0], 0);
@@ -215,7 +213,7 @@ TEST(DynamicArrayMemory, EraseShiftsElements) {
     EXPECT_EQ(arr[2], 3);
     EXPECT_EQ(arr[3], 4);
     
-    arr.erase(0); // Удаляем первый элемент
+    arr.erase(0);
     EXPECT_EQ(arr.size(), 3u);
     EXPECT_EQ(arr[0], 1);
     EXPECT_EQ(arr[1], 3);
@@ -245,7 +243,6 @@ TEST(DynamicArrayMemory, EraseBoundsCheck) {
     EXPECT_THROW(arr.erase(100), std::out_of_range);
 }
 
-// Тесты перемещения
 TEST(DynamicArrayMove, MoveConstructor) {
     CountingMemoryResource mem;
     
@@ -288,7 +285,6 @@ TEST(DynamicArrayMove, MoveAssignment) {
     EXPECT_EQ(source.size(), 0u);
 }
 
-// Тесты резервирования памяти
 TEST(DynamicArrayReserve, ReserveIncreasesCapacity) {
     CountingMemoryResource mem;
     DynamicArray<int> arr(&mem);
@@ -296,9 +292,8 @@ TEST(DynamicArrayReserve, ReserveIncreasesCapacity) {
     arr.reserve(10);
     
     EXPECT_GE(arr.capacity(), 10u);
-    EXPECT_EQ(arr.size(), 0u); // Размер не должен измениться
+    EXPECT_EQ(arr.size(), 0u);
     
-    // Добавляем элементы - переаллокаций быть не должно
     size_t capacity_before = arr.capacity();
     for (int i = 0; i < 10; ++i) {
         arr.push_back(i);
@@ -306,7 +301,6 @@ TEST(DynamicArrayReserve, ReserveIncreasesCapacity) {
     EXPECT_EQ(arr.capacity(), capacity_before);
 }
 
-// Тесты аллокатора
 TEST(MemoryResource, CustomAllocatorUsed) {
     CountingMemoryResource mem;
     
@@ -322,7 +316,6 @@ TEST(MemoryResource, CustomAllocatorUsed) {
     
     arr.clear();
     
-    // При clear память не освобождается, только объекты уничтожаются
     EXPECT_EQ(mem.deallocCount, 0u);
 }
 
@@ -337,22 +330,18 @@ TEST(MemoryResource, MemoryReuse) {
         
         size_t allocs_during_fill = mem.allocCount;
         
-        // Удаляем все элементы
         while (!arr.empty()) {
             arr.erase(0);
         }
         
-        // Снова заполняем - должны переиспользовать память
         for (int i = 0; i < 100; ++i) {
             arr.push_back(i * 2);
         }
         
-        // Количество аллокаций не должно сильно увеличиться
         EXPECT_LE(mem.allocCount, allocs_during_fill + 2);
     }
 }
 
-// Специальные случаи
 TEST(DynamicArrayEdgeCases, EmptyArrayOperations) {
     CountingMemoryResource mem;
     DynamicArray<int> arr(&mem);
@@ -377,46 +366,39 @@ TEST(DynamicArrayEdgeCases, SingleElement) {
     EXPECT_THROW(arr.erase(0), std::out_of_range);
 }
 
-// Комплексный тест
 TEST(DynamicArrayComplex, CombinedOperations) {
     CountingMemoryResource mem;
     DynamicArray<Person> arr(&mem);
     
-    // Добавляем
     arr.push_back(Person("Alice", 25));
     arr.emplace_back("Bob", 30);
     arr.push_back(Person("Charlie", 35));
     
     EXPECT_EQ(arr.size(), 3u);
     
-    // Удаляем средний
     arr.erase(1);
     EXPECT_EQ(arr.size(), 2u);
     EXPECT_EQ(arr[0].name, "Alice");
     EXPECT_EQ(arr[1].name, "Charlie");
     
-    // Добавляем ещё
     arr.emplace_back("David", 40);
     arr.push_back(Person("Eve", 45));
     
     EXPECT_EQ(arr.size(), 4u);
     
-    // Проверяем итерацию
     int total_age = 0;
     for (const auto& person : arr) {
         total_age += person.age;
     }
     EXPECT_EQ(total_age, 25 + 35 + 40 + 45);
     
-    // Очищаем
     arr.clear();
     EXPECT_TRUE(arr.empty());
     EXPECT_EQ(arr.size(), 0u);
 }
 
-// ---------------------- MAIN ----------------------
 int main(int argc, char **argv) {
-    MR_LOG_ENABLED = false; // чтобы тесты не засоряли вывод
+    MR_LOG_ENABLED = false; 
     ::testing::InitGoogleTest(&argc, argv);
     
     std::cout << "Запуск расширенных тестов DynamicArray..." << std::endl;

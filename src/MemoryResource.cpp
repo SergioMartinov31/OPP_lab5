@@ -31,8 +31,6 @@ void* CustomMemoryResource::do_allocate(size_t bytes, size_t alignment) {
 }
 
 void CustomMemoryResource::do_deallocate(void* ptr, size_t bytes, size_t alignment) {
-    (void)bytes; // Явно помечаем как неиспользуемый параметр
-    (void)alignment; // Явно помечаем как неиспользуемый параметр
     
     auto it = allocated.find(ptr);
     if (it == allocated.end())

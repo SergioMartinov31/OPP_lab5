@@ -18,7 +18,6 @@ private:
 
 public:
 
-    // Forward iterator
     class Iterator {
     public:
         using value_type = T;
@@ -42,7 +41,7 @@ public:
         pointer p;
     };
 
-    // Const iterator
+
     class ConstIterator {
     public:
         using value_type = T;
@@ -74,13 +73,11 @@ public:
         if (data) allocator.deallocate(data, cap);
     }
 
-    // disable copy for simplicity (could be added)
     DynamicArray(const DynamicArray&) = delete;
     DynamicArray& operator=(const DynamicArray&) = delete;
 
-    // Move constructor
     DynamicArray(DynamicArray&& other) noexcept 
-        : allocator(other.allocator.resource())  // Копируем только resource, не аллокатор
+        : allocator(other.allocator.resource())  
         , data(other.data)
         , sz(other.sz)
         , cap(other.cap) 
@@ -89,13 +86,11 @@ public:
         other.sz = other.cap = 0;
     }
 
-    // Move assignment
+
     DynamicArray& operator=(DynamicArray&& other) noexcept {
         if (this != &other) {
             clear();
             if (data) allocator.deallocate(data, cap);
-            
-            // Не присваиваем аллокатор, т.к. polymorphic_allocator нельзя присваивать
             data = other.data;
             sz = other.sz;
             cap = other.cap;
@@ -163,7 +158,7 @@ public:
         sz = 0;
     }
 
-    // Erase element at index (shifts subsequent elements left)
+
     void erase(size_t index) {
         if (index >= sz) throw std::out_of_range("erase index out of range");
         
